@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import { FaSearch } from "react-icons/fa";  // for search icon
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,7 +22,6 @@ export default function Home() {
   const [search, setSearch] = useState("");
   const [filterClass, setFilterClass] = useState("");
 
-  // Fetch students
   useEffect(() => {
     const fetchStudents = async () => {
       const { data, error } = await supabase
@@ -40,43 +40,58 @@ export default function Home() {
     fetchStudents();
   }, []);
 
-  // Filtered list
   const filtered = students.filter((s) => {
-    const matchesSearch = s.name.toLowerCase().includes(search.toLowerCase());
+    const matchesName = s.name.toLowerCase().includes(search.toLowerCase());
     const matchesClass = filterClass ? s.class === filterClass : true;
-    return matchesSearch && matchesClass;
+    return matchesName && matchesClass;
   });
 
-  // Collect unique classes for dropdown
   const classes = Array.from(new Set(students.map((s) => s.class))).sort();
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen text-gray-700">
-        Loading...
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-gray-500">Loading...</p>
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-5xl mx-auto bg-white shadow-md rounded-lg p-6">
-        <h1 className="text-2xl font-bold mb-6 text-gray-900">Student List</h1>
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Sidebar */}
+      <aside className="w-64 bg-white border-r">
+        <div className="p-4 font-bold text-xl">Attendance App</div>
+        <nav className="mt-6">
+          <a className="block p-4 hover:bg-gray-100" href="/">Dashboard</a>
+          <a className="block p-4 hover:bg-gray-100" href="/attendance">Attendance</a>
+        </nav>
+      </aside>
 
-        {/* Search + Filter */}
-        <div className="flex flex-col md:flex-row md:items-center md:space-x-4 mb-6 space-y-3 md:space-y-0">
-          <input
-            type="text"
-            placeholder="Search by name..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 w-full md:w-1/2 focus:ring focus:ring-blue-200 text-gray-800"
-          />
+      {/* Main Content */}
+      <div className="flex-1 overflow-auto p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-semibold text-gray-800">Student List</h1>
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+            + Add Student
+          </button>
+        </div>
 
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row sm:space-x-4 mb-6">
+          <div className="relative flex-1">
+            <FaSearch className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by name..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10 pr-3 py-2 w-full border rounded-md focus:outline-none focus:ring"
+            />
+          </div>
           <select
             value={filterClass}
             onChange={(e) => setFilterClass(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 w-full md:w-1/4 focus:ring focus:ring-blue-200 text-gray-800"
+            className="mt-2 sm:mt-0 border rounded-md px-3 py-2 shadow-sm"
           >
             <option value="">All Classes</option>
             {classes.map((c) => (
@@ -88,35 +103,37 @@ export default function Home() {
         </div>
 
         {/* Table */}
-        {filtered.length === 0 ? (
-          <p className="text-gray-500">No students found</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-gray-200 text-left text-gray-800">
-                  <th className="px-4 py-2 border-b">NIS/NTA</th>
-                  <th className="px-4 py-2 border-b">Nama</th>
-                  <th className="px-4 py-2 border-b">Kelas</th>
-                  <th className="px-4 py-2 border-b">Angkatan</th>
+        <div className="shadow overflow-hidden border rounded-md bg-white">
+          <table className="min-w-full">
+            <thead className="bg-gray-100 text-gray-600">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                  ID
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                  Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                  Class
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                  Gen
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filtered.map((s) => (
+                <tr key={s.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{s.id}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{s.name}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{s.class}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{s.gen}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {filtered.map((s) => (
-                  <tr key={s.id} className="hover:bg-gray-50 transition">
-                    <td className="px-4 py-2 border-b text-gray-700">{s.id}</td>
-                    <td className="px-4 py-2 border-b font-medium text-gray-900">
-                      {s.name}
-                    </td>
-                    <td className="px-4 py-2 border-b text-gray-700">{s.class}</td>
-                    <td className="px-4 py-2 border-b text-gray-700">{s.gen}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
