@@ -1,32 +1,36 @@
-import { createClient } from '@supabase/supabase-js'
+"use client";
 
-// Supabase client
+import { useEffect, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+);
 
-export default async function Home() {
-  const { data: students, error } = await supabase
-    .from('students')
-    .select('id, name, class')
-    .order('class', { ascending: true })
-    .order('name', { ascending: true })
+export default function Home() {
+  const [students, setStudents] = useState<any[]>([]);
 
-  if (error) {
-    console.error(error)
-  }
+  useEffect(() => {
+    const fetchStudents = async () => {
+      const { data, error } = await supabase.from("students").select("*");
+      if (error) console.error("Error fetching students:", error);
+      else setStudents(data);
+    };
+
+    fetchStudents();
+  }, []);
 
   return (
-    <main className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Student List</h1>
+    <main style={{ padding: "20px", color: "white" }}>
+      <h1>Student List</h1>
       <ul>
-        {students?.map((s) => (
-          <li key={s.id}>
-            {s.class} – {s.name} (ID: {s.id})
+        {students.map((student) => (
+          <li key={students.id}>
+            {students.name} — {students.class}
           </li>
         ))}
       </ul>
     </main>
-  )
+  );
 }
