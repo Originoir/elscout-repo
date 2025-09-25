@@ -26,8 +26,8 @@ export default function Home() {
       <h1>Student List</h1>
       <ul>
         {students.map((student) => (
-          <li key={students.id}>
-            {students.name} — {students.class}
+          <li key={student.id}>
+            {student.name} — {student.class}
           </li>
         ))}
       </ul>
