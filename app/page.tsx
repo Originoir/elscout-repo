@@ -12,6 +12,7 @@ type Student = {
   id: number;
   name: string;
   class: string;
+  gen: number;
 };
 
 export default function Home() {
@@ -25,7 +26,7 @@ export default function Home() {
     const fetchStudents = async () => {
       const { data, error } = await supabase
         .from("students")
-        .select("id, name, class")
+        .select("id, name, class, gen")
         .order("id", { ascending: true });
 
       if (error) {
@@ -51,7 +52,7 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen text-gray-200">
+      <div className="flex items-center justify-center h-screen text-gray-700">
         Loading...
       </div>
     );
@@ -60,7 +61,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-5xl mx-auto bg-white shadow-md rounded-lg p-6">
-        <h1 className="text-2xl font-bold mb-6 text-gray-800">Student List</h1>
+        <h1 className="text-2xl font-bold mb-6 text-gray-900">Student List</h1>
 
         {/* Search + Filter */}
         <div className="flex flex-col md:flex-row md:items-center md:space-x-4 mb-6 space-y-3 md:space-y-0">
@@ -69,13 +70,13 @@ export default function Home() {
             placeholder="Search by name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 w-full md:w-1/2 focus:ring focus:ring-blue-200"
+            className="border border-gray-300 rounded-md px-3 py-2 w-full md:w-1/2 focus:ring focus:ring-blue-200 text-gray-800"
           />
 
           <select
             value={filterClass}
             onChange={(e) => setFilterClass(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 w-full md:w-1/4 focus:ring focus:ring-blue-200"
+            className="border border-gray-300 rounded-md px-3 py-2 w-full md:w-1/4 focus:ring focus:ring-blue-200 text-gray-800"
           >
             <option value="">All Classes</option>
             {classes.map((c) => (
@@ -93,23 +94,22 @@ export default function Home() {
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="bg-gray-200 text-left">
-                  <th className="px-4 py-2 border-b">ID</th>
-                  <th className="px-4 py-2 border-b">Name</th>
-                  <th className="px-4 py-2 border-b">Class</th>
+                <tr className="bg-gray-200 text-left text-gray-800">
+                  <th className="px-4 py-2 border-b">NIS/NTA</th>
+                  <th className="px-4 py-2 border-b">Nama</th>
+                  <th className="px-4 py-2 border-b">Kelas</th>
+                  <th className="px-4 py-2 border-b">Angkatan</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((s) => (
-                  <tr
-                    key={s.id}
-                    className="hover:bg-gray-50 transition"
-                  >
+                  <tr key={s.id} className="hover:bg-gray-50 transition">
                     <td className="px-4 py-2 border-b text-gray-700">{s.id}</td>
-                    <td className="px-4 py-2 border-b font-medium text-gray-800">
+                    <td className="px-4 py-2 border-b font-medium text-gray-900">
                       {s.name}
                     </td>
-                    <td className="px-4 py-2 border-b text-gray-600">{s.class}</td>
+                    <td className="px-4 py-2 border-b text-gray-700">{s.class}</td>
+                    <td className="px-4 py-2 border-b text-gray-700">{s.gen}</td>
                   </tr>
                 ))}
               </tbody>
