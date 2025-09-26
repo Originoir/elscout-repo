@@ -219,35 +219,39 @@ export default function AttendanceSheetPage() {
                 <tr key={student.id} className="hover:bg-gray-700">
                   <td className="py-2 px-4">{student.name}</td>
                   <td className="py-2 px-4">
-                    <select
-                      className={`px-3 py-2 rounded font-semibold ${
-                        STATUS_COLORS[
-                          (attendance[student.id] as AttendanceStatus) || "Hadir"
-                        ]
-                      } bg-gray-900`}
-                      value={attendance[student.id] || ""}
-                      onChange={(e) =>
-                        handleStatusChange(
-                          student.id,
-                          e.target.value as AttendanceStatus
-                        )
-                      }
-                    >
-                      <option value="">--</option>
-                      <option value="Hadir" className="text-blue-600">
-                        Hadir
-                      </option>
-                      <option value="Izin" className="text-orange-500">
-                        Izin
-                      </option>
-                      <option value="Sakit" className="text-green-600">
-                        Sakit
-                      </option>
-                      <option value="Alfa" className="text-red-500">
-                        Alfa
-                      </option>
-                      {/* Do not add Libur to dropdown */}
-                    </select>
+                    {attendance[student.id] === "Libur" ? (
+                      <span className={`font-semibold ${STATUS_COLORS["Libur"]}`}>Libur</span>
+                    ) : (
+                      <select
+                        className={`px-3 py-2 rounded font-semibold ${
+                          STATUS_COLORS[
+                            (attendance[student.id] as AttendanceStatus) || "Hadir"
+                          ]
+                        } bg-gray-900`}
+                        value={attendance[student.id] || ""}
+                        onChange={(e) =>
+                          handleStatusChange(
+                            student.id,
+                            e.target.value as AttendanceStatus
+                          )
+                        }
+                      >
+                        <option value="">--</option>
+                        <option value="Hadir" className="text-blue-600">
+                          Hadir
+                        </option>
+                        <option value="Izin" className="text-orange-500">
+                          Izin
+                        </option>
+                        <option value="Sakit" className="text-green-600">
+                          Sakit
+                        </option>
+                        <option value="Alfa" className="text-red-500">
+                          Alfa
+                        </option>
+                        {/* Do not add Libur to dropdown */}
+                      </select>
+                    )}
                   </td>
                 </tr>
               ))
