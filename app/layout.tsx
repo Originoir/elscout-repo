@@ -1,5 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import Sidebar from "@/components/Sidebar";
 
 export const metadata: Metadata = {
   title: "Attendance App",
@@ -13,7 +14,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-gray-900 text-white">{children}</body>
+      <body className="bg-gray-900 text-white">
+        <div className="flex">
+          <Sidebar />
+          <div className="flex-1">{children}</div>
+        </div>
+      </body>
     </html>
   );
 }
