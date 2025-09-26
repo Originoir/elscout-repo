@@ -48,9 +48,6 @@ export default function AttendanceHistoryPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [attendance, setAttendance] = useState<Record<number, AttendanceStatus>>({});
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [successMsg, setSuccessMsg] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
 
   // Fetch students for selected class
   useEffect(() => {
@@ -110,41 +107,6 @@ export default function AttendanceHistoryPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [students, selectedDate]);
 
-  // Handle status change
-  function handleStatusChange(studentId: number, status: AttendanceStatus) {
-    setAttendance((prev) => ({
-      ...prev,
-      [studentId]: status,
-    }));
-  }
-
-  // Save attendance to database
-  async function handleSaveAttendance() {
-    setSaving(true);
-    setSuccessMsg("");
-    setErrorMsg("");
-    try {
-      // Prepare upsert data
-      const rows = students.map((student) => ({
-        date: selectedDate,
-        student_id: student.id,
-        status: attendance[student.id] || "Hadir",
-      }));
-      // Upsert attendance
-      const { error } = await supabase.from("attendance").upsert(rows, {
-        onConflict: "date,student_id",
-      });
-      if (error) {
-        setErrorMsg(error.message);
-      } else {
-        setSuccessMsg("Attendance saved!");
-      }
-    } catch (err: any) {
-      setErrorMsg("Failed to save attendance.");
-    }
-    setSaving(false);
-  }
-
   return (
     <main className="p-6 text-white">
       <h1 className="text-2xl font-bold mb-4">Attendance History</h1>
@@ -172,16 +134,7 @@ export default function AttendanceHistoryPage() {
             ))}
           </select>
         </div>
-        <button
-          className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 font-semibold"
-          onClick={handleSaveAttendance}
-          disabled={saving}
-        >
-          {saving ? "Saving..." : "Input Attendance"}
-        </button>
       </div>
-      {successMsg && <div className="text-green-400 mb-2">{successMsg}</div>}
-      {errorMsg && <div className="text-red-400 mb-2">{errorMsg}</div>}
       <div className="overflow-x-auto">
         <table className="min-w-full bg-gray-800 rounded">
           <thead>
@@ -207,22 +160,8 @@ export default function AttendanceHistoryPage() {
               students.map((student) => (
                 <tr key={student.id} className="hover:bg-gray-700">
                   <td className="py-2 px-4">{student.name}</td>
-                  <td className="py-2 px-4">
-                    <select
-                      className={`px-3 py-2 rounded font-semibold ${STATUS_COLORS[attendance[student.id] as AttendanceStatus || "Hadir"]} bg-gray-900`}
-                      value={attendance[student.id] || "Hadir"}
-                      onChange={(e) =>
-                        handleStatusChange(
-                          student.id,
-                          e.target.value as AttendanceStatus
-                        )
-                      }
-                    >
-                      <option value="Hadir" className="text-blue-600">Hadir</option>
-                      <option value="Izin" className="text-orange-500">Izin</option>
-                      <option value="Sakit" className="text-green-600">Sakit</option>
-                      <option value="Alfa" className="text-red-500">Alfa</option>
-                    </select>
+                  <td className={`py-2 px-4 font-semibold ${STATUS_COLORS[attendance[student.id] as AttendanceStatus || "Hadir"]}`}>
+                    {attendance[student.id] || "Hadir"}
                   </td>
                 </tr>
               ))
