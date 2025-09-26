@@ -36,6 +36,7 @@ export default function DashboardPage() {
   useEffect(() => {
     async function fetchAttendanceCounts() {
       setLoading(true);
+      console.log("Selected date:", selectedDate);
       const { data, error } = await supabase
         .from("attendance")
         .select("status", { count: "exact", head: false })
@@ -71,7 +72,6 @@ export default function DashboardPage() {
         <input
           id="date"
           type="date"
-          className="rounded px-3 py-2 border border-gray-300 text-black"
           value={selectedDate}
           onChange={e => setSelectedDate(e.target.value)}
         />
