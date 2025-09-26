@@ -1,34 +1,105 @@
-import ReportsChart from "@/components/AttendanceChart";
+"use client";
+
+import { useEffect, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
+import { FaSearch } from "react-icons/fa";
+import AttendanceChart from "@/components/AttendanceChart";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+type AttendanceStatus = "Hadir" | "Sakit" | "Izin" | "Alfa" | "Libur";
+
+type AttendanceCounts = {
+  Hadir: number;
+  Sakit: number;
+  Izin: number;
+  Alfa: number;
+};
+
+function formatDate(date: Date) {
+  return date.toISOString().split("T")[0];
+}
 
 export default function DashboardPage() {
+  const [selectedDate, setSelectedDate] = useState<string>(formatDate(new Date()));
+  const [counts, setCounts] = useState<AttendanceCounts>({
+    Hadir: 0,
+    Sakit: 0,
+    Izin: 0,
+    Alfa: 0,
+  });
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    async function fetchAttendanceCounts() {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("attendance")
+        .select("status", { count: "exact", head: false })
+        .eq("date", selectedDate);
+
+      if (error) {
+        setCounts({ Hadir: 0, Sakit: 0, Izin: 0, Alfa: 0 });
+        setLoading(false);
+        return;
+      }
+
+      // Count each status
+      const statusCounts: AttendanceCounts = { Hadir: 0, Sakit: 0, Izin: 0, Alfa: 0 };
+      data?.forEach((row: { status: AttendanceStatus }) => {
+        if (row.status in statusCounts) {
+          statusCounts[row.status as keyof AttendanceCounts]++;
+        }
+      });
+      setCounts(statusCounts);
+      setLoading(false);
+    }
+
+    fetchAttendanceCounts();
+  }, [selectedDate]);
+
   return (
     <div className="p-6">
+      {/* Date Picker */}
+      <div className="mb-6 flex items-center gap-4">
+        <label htmlFor="date" className="text-lg font-medium">
+          Pilih Tanggal:
+        </label>
+        <input
+          id="date"
+          type="date"
+          className="rounded px-3 py-2 border border-gray-300 text-black"
+          value={selectedDate}
+          onChange={e => setSelectedDate(e.target.value)}
+        />
+        {loading && <span className="ml-2 text-gray-400">Loading...</span>}
+      </div>
+
       {/* Top stats cards (Hadir, Sakit, Izin, Alfa) */}
       <div className="grid grid-cols-4 gap-4 mb-6">
         <div className="bg-white rounded-2xl shadow-md p-4 text-center">
-          <h3 className="text-blue-600 font-medium">Hadir | Hari ini</h3>
-          <p className="text-3xl font-bold text-blue-600">300</p>
-          <span className="text-sm text-gray-500">12% increase</span>
+          <h3 className="text-blue-600 font-medium">Hadir | {selectedDate}</h3>
+          <p className="text-3xl font-bold text-blue-600">{counts.Hadir}</p>
         </div>
         <div className="bg-white rounded-2xl shadow-md p-4 text-center">
-          <h3 className="text-green-600 font-medium">Sakit | Hari ini</h3>
-          <p className="text-3xl font-bold text-green-600">20</p>
-          <span className="text-sm text-gray-500">12% increase</span>
+          <h3 className="text-green-600 font-medium">Sakit | {selectedDate}</h3>
+          <p className="text-3xl font-bold text-green-600">{counts.Sakit}</p>
         </div>
         <div className="bg-white rounded-2xl shadow-md p-4 text-center">
-          <h3 className="text-orange-500 font-medium">Izin | Hari ini</h3>
-          <p className="text-3xl font-bold text-orange-500">20</p>
-          <span className="text-sm text-gray-500">12% increase</span>
+          <h3 className="text-orange-500 font-medium">Izin | {selectedDate}</h3>
+          <p className="text-3xl font-bold text-orange-500">{counts.Izin}</p>
         </div>
         <div className="bg-white rounded-2xl shadow-md p-4 text-center">
-          <h3 className="text-red-500 font-medium">Alfa | Hari ini</h3>
-          <p className="text-3xl font-bold text-red-500">10</p>
-          <span className="text-sm text-gray-500">12% increase</span>
+          <h3 className="text-red-500 font-medium">Alfa | {selectedDate}</h3>
+          <p className="text-3xl font-bold text-red-500">{counts.Alfa}</p>
         </div>
       </div>
 
-      {/* Reports Chart */}
-      <ReportsChart />
+      {/* Attendance Chart */}
+      <AttendanceChart />
     </div>
   );
 }
