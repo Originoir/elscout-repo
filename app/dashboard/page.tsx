@@ -66,7 +66,7 @@ export default function DashboardPage() {
     <div className="p-6">
       {/* Date Picker */}
       <div className="mb-6 flex items-center gap-4">
-        <label htmlFor="date" className="text-lg font-medium">
+        <label htmlFor="date" className="text-lg font-medium text-gray-700">
           Pilih Tanggal:
         </label>
         <input
@@ -99,7 +99,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Attendance Chart */}
-      <AttendanceChart />
+      <AttendanceChart selectedDate={selectedDate} />
     </div>
   );
 }

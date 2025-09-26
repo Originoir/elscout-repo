@@ -1,4 +1,4 @@
-// app/components/StackedBarChart.tsx
+// app/components/AttendanceChart.tsx
 "use client";
 
 import {
@@ -10,32 +10,114 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { useEffect, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
 
-const data = [
-  { name: "Room Revenue", English: 83, Korean: 7, Japanese: 6, Other: 4 },
-  { name: "Room Nights", English: 74, Korean: 13, Japanese: 9, Other: 4 },
-  { name: "Room Reservation", English: 88, Korean: 6, Japanese: 2, Other: 4 },
-  { name: "R&R Traffic", English: 75, Korean: 11, Japanese: 8, Other: 6 },
-  { name: "Traffic", English: 75, Korean: 11, Japanese: 8, Other: 6 },
-];
+// Setup Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
-export default function StackedBarChart() {
+type AttendanceStatus = "Hadir" | "Sakit" | "Izin" | "Alfa";
+type ClassName = string;
+
+type AttendanceBarData = {
+  class: ClassName;
+  Hadir: number;
+  Sakit: number;
+  Izin: number;
+  Alfa: number;
+};
+
+type AttendanceRecord = {
+  class: ClassName;
+  status: AttendanceStatus;
+};
+
+interface AttendanceChartProps {
+  selectedDate: string;
+}
+
+export default function AttendanceChart({ selectedDate }: AttendanceChartProps) {
+  const [data, setData] = useState<AttendanceBarData[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    async function fetchAttendance() {
+      setLoading(true);
+      // Get all attendance for the selected date, joined with students to get class
+      const { data, error } = await supabase
+        .from("attendance")
+        .select("status,student_id,students(class)")
+        .eq("date", selectedDate);
+
+      if (error) {
+        setData([]);
+        setLoading(false);
+        return;
+      }
+
+      // XE1 to XE9
+      const classes = Array.from({ length: 9 }, (_, i) => `XE${i + 1}`);
+
+      // Initialize counts
+      const classStatusMap: Record<ClassName, AttendanceBarData> = {};
+      for (const className of classes) {
+        classStatusMap[className] = {
+          class: className,
+          Hadir: 0,
+          Sakit: 0,
+          Izin: 0,
+          Alfa: 0,
+        };
+      }
+
+      // Count statuses per class
+      (data as any[]).forEach((row) => {
+        const className = row.students?.class;
+        const status = row.status as AttendanceStatus;
+        if (
+          className &&
+          classStatusMap[className] &&
+          ["Hadir", "Sakit", "Izin", "Alfa"].includes(status)
+        ) {
+          classStatusMap[className][status]++;
+        }
+      });
+
+      setData(classes.map((c) => classStatusMap[c]));
+      setLoading(false);
+    }
+
+    fetchAttendance();
+  }, [selectedDate]);
+
   return (
     <div className="w-full h-[400px] bg-white rounded-2xl shadow p-4">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} stackOffset="expand">
-          <XAxis dataKey="name" />
-          <YAxis tickFormatter={(value) => `${(value * 100).toFixed(0)}%`} />
-          <Tooltip formatter={(value: number) => `${value}%`} />
-          <Legend />
-
-          {/* Adjusted color palette for modern clean look */}
-          <Bar dataKey="English" stackId="a" fill="#3B82F6" /> {/* Blue-500 */}
-          <Bar dataKey="Korean" stackId="a" fill="#EF4444" /> {/* Red-500 */}
-          <Bar dataKey="Japanese" stackId="a" fill="#F59E0B" /> {/* Amber-500 */}
-          <Bar dataKey="Other" stackId="a" fill="#10B981" /> {/* Emerald-500 */}
-        </BarChart>
-      </ResponsiveContainer>
+      {loading ? (
+        <div className="text-center text-gray-500 mt-32">Loading chart...</div>
+      ) : (
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data}>
+            <XAxis dataKey="class" />
+            <YAxis
+              allowDecimals={false}
+              label={{
+                value: "Jumlah Siswa",
+                angle: -90,
+                position: "insideLeft",
+              }}
+            />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="Hadir" stackId="a" fill="#3B82F6" name="Hadir" />
+            <Bar dataKey="Sakit" stackId="a" fill="#22C55E" name="Sakit" />
+            <Bar dataKey="Izin" stackId="a" fill="#F59E0B" name="Izin" />
+            <Bar dataKey="Alfa" stackId="a" fill="#EF4444" name="Alfa" />
+          </BarChart>
+        </ResponsiveContainer>
+      )}
     </div>
   );
 }
