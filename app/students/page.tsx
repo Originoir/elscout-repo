@@ -14,6 +14,10 @@ type Student = {
   class: string;
 };
 
+type ClassRow = {
+  class: string;
+};
+
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [search, setSearch] = useState("");
@@ -32,6 +36,9 @@ export default function StudentsPage() {
   // CSV upload state
   const [csvError, setCsvError] = useState("");
   const [csvSuccess, setCsvSuccess] = useState("");
+
+  // Class list from DB
+  const [classList, setClassList] = useState<string[]>([]);
 
   // Fetch students from Supabase
   useEffect(() => {
@@ -58,13 +65,24 @@ export default function StudentsPage() {
     fetchStudents();
   }, [classFilter, addSuccess, csvSuccess]);
 
+  // Fetch class list from Supabase
+  useEffect(() => {
+    async function fetchClasses() {
+      const { data, error } = await supabase
+        .from("classes")
+        .select("class")
+        .order("class", { ascending: true });
+      if (!error && data) {
+        setClassList(data.map((row: ClassRow) => row.class));
+      }
+    }
+    fetchClasses();
+  }, []);
+
   // Filtered students by search
   const filteredStudents = students.filter((student) =>
     student.name.toLowerCase().includes(search.toLowerCase())
   );
-
-  // Get unique class list for filter dropdown
-  const classList = Array.from(new Set(students.map((s) => s.class))).sort();
 
   // Handle add or edit student
   async function handleAddOrEditStudent(e: FormEvent) {
@@ -73,6 +91,10 @@ export default function StudentsPage() {
     setAddSuccess("");
     if (!addId || !addName || !addClass) {
       setAddError("All fields are required.");
+      return;
+    }
+    if (!classList.includes(addClass)) {
+      setAddError("Class must be selected from the list.");
       return;
     }
     if (editId !== null) {
@@ -179,12 +201,12 @@ export default function StudentsPage() {
           name: name?.trim(),
           class: cls?.trim(),
         }));
-        // Filter out invalid rows
+        // Filter out invalid rows and classes not in classList
         const validStudents = studentsToInsert.filter(
-          (s) => s.id && s.name && s.class
+          (s) => s.id && s.name && s.class && classList.includes(s.class)
         );
         if (validStudents.length === 0) {
-          setCsvError("No valid students found in CSV.");
+          setCsvError("No valid students found in CSV or class not in list.");
           return;
         }
         const { error } = await supabase.from("students").insert(validStudents);
@@ -285,14 +307,19 @@ export default function StudentsPage() {
             onChange={(e) => setAddName(e.target.value)}
             required
           />
-          <input
-            type="text"
-            placeholder="Class"
+          <select
             className="px-3 py-2 rounded bg-gray-700 text-white"
             value={addClass}
             onChange={(e) => setAddClass(e.target.value)}
             required
-          />
+          >
+            <option value="">Select Class</option>
+            {classList.map((cls) => (
+              <option key={cls} value={cls}>
+                {cls}
+              </option>
+            ))}
+          </select>
           <button
             type="submit"
             className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 font-semibold"
