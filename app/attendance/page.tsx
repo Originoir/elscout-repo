@@ -210,7 +210,7 @@ export default function AttendanceHistoryPage() {
                   <td className="py-2 px-4">
                     <select
                       className={`px-3 py-2 rounded font-semibold ${STATUS_COLORS[attendance[student.id] as AttendanceStatus || "Hadir"]} bg-gray-900`}
-                      value={attendance[student.id] || "Hadir"}
+                      value={attendance[student.id] || ""}
                       onChange={(e) =>
                         handleStatusChange(
                           student.id,
@@ -218,6 +218,7 @@ export default function AttendanceHistoryPage() {
                         )
                       }
                     >
+                      <option value="">--</option>
                       <option value="Hadir" className="text-blue-600">Hadir</option>
                       <option value="Izin" className="text-orange-500">Izin</option>
                       <option value="Sakit" className="text-green-600">Sakit</option>

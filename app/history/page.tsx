@@ -160,8 +160,8 @@ export default function AttendanceHistoryPage() {
               students.map((student) => (
                 <tr key={student.id} className="hover:bg-gray-700">
                   <td className="py-2 px-4">{student.name}</td>
-                  <td className={`py-2 px-4 font-semibold ${STATUS_COLORS[attendance[student.id] as AttendanceStatus || "Hadir"]}`}>
-                    {attendance[student.id] || "Hadir"}
+                  <td className={`py-2 px-4 font-semibold ${attendance[student.id] ? STATUS_COLORS[attendance[student.id] as AttendanceStatus] : "text-gray-400"}`}>
+                    {attendance[student.id] ? attendance[student.id] : "no record"}
                   </td>
                 </tr>
               ))
