@@ -160,17 +160,6 @@ export default function StudentsPage() {
     }
   }
 
-  // Handle batch delete
-  async function handleBatchDelete() {
-    if (!confirm("Are you sure you want to delete ALL students?")) return;
-    const { error } = await supabase.from("students").delete().neq("id", 0);
-    if (error) {
-      setAddError(error.message);
-    } else {
-      setAddSuccess("All students deleted!");
-    }
-  }
-
   // Handle CSV upload
   async function handleCsvUpload(e: ChangeEvent<HTMLInputElement>) {
     setCsvError("");
@@ -181,26 +170,32 @@ export default function StudentsPage() {
     reader.onload = async (event) => {
       try {
         const text = event.target?.result as string;
-        // Expecting CSV: id,name,class
+        // Split and parse CSV
         const rows = text
           .split("\n")
           .map((row) => row.trim())
           .filter(Boolean)
           .map((row) => row.split(","));
-        // Remove header if present
+        // Detect header and columns
         let startIdx = 0;
+        let hasGen = false;
         if (
           rows[0][0].toLowerCase() === "id" &&
-          rows[0][1].toLowerCase() === "name" &&
-          rows[0][2].toLowerCase() === "class"
+          rows[0][1].toLowerCase() === "class" &&
+          rows[0][2].toLowerCase() === "name"
         ) {
+          hasGen = rows[0][3]?.toLowerCase() === "gen";
           startIdx = 1;
         }
-        const studentsToInsert = rows.slice(startIdx).map(([id, name, cls]) => ({
-          id: Number(id),
-          name: name?.trim(),
-          class: cls?.trim(),
-        }));
+        const studentsToInsert = rows.slice(startIdx).map((cols) => {
+          const [id, cls, name, gen] = cols;
+          return {
+            id: Number(id),
+            name: name?.trim(),
+            class: cls?.trim(),
+            ...(hasGen && gen ? { gen: Number(gen) } : {}),
+          };
+        });
         // Filter out invalid rows and classes not in classList
         const validStudents = studentsToInsert.filter(
           (s) => s.id && s.name && s.class && classList.includes(s.class)
@@ -274,12 +269,6 @@ export default function StudentsPage() {
             onChange={handleCsvUpload}
           />
         </label>
-        <button
-          className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 font-semibold"
-          onClick={handleBatchDelete}
-        >
-          Delete All
-        </button>
       </div>
       {addError && <div className="text-red-400 mb-2">{addError}</div>}
       {addSuccess && <div className="text-green-400 mb-2">{addSuccess}</div>}
