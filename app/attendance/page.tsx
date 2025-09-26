@@ -8,24 +8,19 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-type AttendanceStatus = "Hadir" | "Sakit" | "Izin" | "Alfa";
+type AttendanceStatus = "Hadir" | "Sakit" | "Izin" | "Alfa" | "Libur";
 const STATUS_COLORS: Record<AttendanceStatus, string> = {
   Hadir: "text-blue-600",
   Sakit: "text-green-600",
   Izin: "text-orange-500",
   Alfa: "text-red-500",
+  Libur: "text-gray-400",
 };
 
 type Student = {
   id: number;
   name: string;
   class: string;
-};
-
-type AttendanceRow = {
-  student_id: number;
-  status: AttendanceStatus;
-  date: string;
 };
 
 function getLastFriday(date = new Date()) {
@@ -40,7 +35,7 @@ function getLastFriday(date = new Date()) {
 const XE_CLASSES = Array.from({ length: 9 }, (_, i) => `XE${i + 1}`);
 const ALL_CLASSES = [...XE_CLASSES, "DA"];
 
-export default function AttendanceHistoryPage() {
+export default function AttendanceSheetPage() {
   // Default date: today if Friday, else previous Friday
   const defaultDate = getLastFriday();
   const [selectedDate, setSelectedDate] = useState(defaultDate);
@@ -118,6 +113,15 @@ export default function AttendanceHistoryPage() {
     }));
   }
 
+  // Set all students to Libur
+  function handleSetAllLibur() {
+    const newAttendance: Record<number, AttendanceStatus> = {};
+    students.forEach((student) => {
+      newAttendance[student.id] = "Libur";
+    });
+    setAttendance(newAttendance);
+  }
+
   // Save attendance to database
   async function handleSaveAttendance() {
     setSaving(true);
@@ -147,7 +151,7 @@ export default function AttendanceHistoryPage() {
 
   return (
     <main className="p-6 text-white">
-      <h1 className="text-2xl font-bold mb-4">Attendance History</h1>
+      <h1 className="text-2xl font-bold mb-4">Attendance Sheet</h1>
       <div className="flex flex-col md:flex-row gap-4 mb-6 items-end">
         <div>
           <label className="block mb-1 text-gray-300">Date</label>
@@ -172,6 +176,13 @@ export default function AttendanceHistoryPage() {
             ))}
           </select>
         </div>
+        <button
+          className="px-4 py-2 rounded bg-gray-500 hover:bg-gray-600 font-semibold"
+          type="button"
+          onClick={handleSetAllLibur}
+        >
+          Set All Libur
+        </button>
         <button
           className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 font-semibold"
           onClick={handleSaveAttendance}
@@ -209,7 +220,11 @@ export default function AttendanceHistoryPage() {
                   <td className="py-2 px-4">{student.name}</td>
                   <td className="py-2 px-4">
                     <select
-                      className={`px-3 py-2 rounded font-semibold ${STATUS_COLORS[attendance[student.id] as AttendanceStatus || "Hadir"]} bg-gray-900`}
+                      className={`px-3 py-2 rounded font-semibold ${
+                        STATUS_COLORS[
+                          (attendance[student.id] as AttendanceStatus) || "Hadir"
+                        ]
+                      } bg-gray-900`}
                       value={attendance[student.id] || ""}
                       onChange={(e) =>
                         handleStatusChange(
@@ -219,10 +234,19 @@ export default function AttendanceHistoryPage() {
                       }
                     >
                       <option value="">--</option>
-                      <option value="Hadir" className="text-blue-600">Hadir</option>
-                      <option value="Izin" className="text-orange-500">Izin</option>
-                      <option value="Sakit" className="text-green-600">Sakit</option>
-                      <option value="Alfa" className="text-red-500">Alfa</option>
+                      <option value="Hadir" className="text-blue-600">
+                        Hadir
+                      </option>
+                      <option value="Izin" className="text-orange-500">
+                        Izin
+                      </option>
+                      <option value="Sakit" className="text-green-600">
+                        Sakit
+                      </option>
+                      <option value="Alfa" className="text-red-500">
+                        Alfa
+                      </option>
+                      {/* Do not add Libur to dropdown */}
                     </select>
                   </td>
                 </tr>
