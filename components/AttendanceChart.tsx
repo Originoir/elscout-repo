@@ -30,11 +30,6 @@ type AttendanceBarData = {
   Alfa: number;
 };
 
-type AttendanceRecord = {
-  class: ClassName;
-  status: AttendanceStatus;
-};
-
 interface AttendanceChartProps {
   selectedDate: string;
 }
@@ -58,12 +53,14 @@ export default function AttendanceChart({ selectedDate }: AttendanceChartProps) 
         return;
       }
 
-      // XE1 to XE9
-      const classes = Array.from({ length: 9 }, (_, i) => `XE${i + 1}`);
+      // XE1 to XE9 and DA (XIF1-XIF9 combined)
+      const xeClasses = Array.from({ length: 9 }, (_, i) => `XE${i + 1}`);
+      const daLabel = "DA";
+      const allClasses = [...xeClasses, daLabel];
 
       // Initialize counts
       const classStatusMap: Record<ClassName, AttendanceBarData> = {};
-      for (const className of classes) {
+      for (const className of xeClasses) {
         classStatusMap[className] = {
           class: className,
           Hadir: 0,
@@ -72,21 +69,34 @@ export default function AttendanceChart({ selectedDate }: AttendanceChartProps) 
           Alfa: 0,
         };
       }
+      // For DA (XIF1-XIF9 combined)
+      classStatusMap[daLabel] = {
+        class: daLabel,
+        Hadir: 0,
+        Sakit: 0,
+        Izin: 0,
+        Alfa: 0,
+      };
 
-      // Count statuses per class
+      // Count statuses per class and for DA
       (data as any[]).forEach((row) => {
         const className = row.students?.class;
         const status = row.status as AttendanceStatus;
         if (
           className &&
-          classStatusMap[className] &&
           ["Hadir", "Sakit", "Izin", "Alfa"].includes(status)
         ) {
-          classStatusMap[className][status]++;
+          if (classStatusMap[className]) {
+            classStatusMap[className][status]++;
+          }
+          // If class is XIF1-XIF9, also add to DA
+          if (/^XIF[1-9]$/.test(className)) {
+            classStatusMap[daLabel][status]++;
+          }
         }
       });
 
-      setData(classes.map((c) => classStatusMap[c]));
+      setData(allClasses.map((c) => classStatusMap[c]));
       setLoading(false);
     }
 
