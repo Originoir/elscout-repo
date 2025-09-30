@@ -1,53 +1,87 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "@/lib/supabaseClient"; // make sure you have this client
 
 export default function RegisterPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [memberId, setMemberId] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.auth.signUp({ email, password });
+
+    if (password !== confirmPassword) {
+      setMessage("Passwords do not match");
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { member_id: memberId } // 👈 this gets passed to the trigger
+      }
+    });
+
     if (error) {
-      setError(error.message);
+      setMessage(error.message);
     } else {
-      router.push("/dashboard");
+      setMessage("Registration successful! Please check your email to verify.");
     }
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-900 text-white">
-      <form
-        onSubmit={handleRegister}
-        className="bg-gray-800 p-8 rounded w-96 flex flex-col gap-4"
-      >
-        <h2 className="text-2xl font-bold">Register</h2>
-        {error && <p className="text-red-400">{error}</p>}
+    <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
+      <form onSubmit={handleRegister} className="bg-gray-800 p-6 rounded w-80 space-y-4">
+        <h2 className="text-xl font-bold">Register</h2>
+
+        <input
+          type="text"
+          placeholder="Member ID"
+          value={memberId}
+          onChange={(e) => setMemberId(e.target.value)}
+          className="w-full p-2 rounded bg-gray-700"
+          required
+        />
+
         <input
           type="email"
           placeholder="Email"
-          className="p-2 rounded bg-gray-700"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-2 rounded bg-gray-700"
+          required
         />
+
         <input
           type="password"
           placeholder="Password"
-          className="p-2 rounded bg-gray-700"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-2 rounded bg-gray-700"
+          required
         />
+
+        <input
+          type="password"
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          className="w-full p-2 rounded bg-gray-700"
+          required
+        />
+
         <button
           type="submit"
-          className="bg-green-600 hover:bg-green-700 py-2 rounded"
+          className="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded font-semibold"
         >
           Register
         </button>
+
+        {message && <p className="text-sm text-red-400">{message}</p>}
       </form>
     </div>
   );
