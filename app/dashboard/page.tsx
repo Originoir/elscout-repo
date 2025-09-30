@@ -63,10 +63,10 @@ export default function DashboardPage() {
   }, [selectedDate]);
 
   return (
-    <div className="p-6">
+    <div className="p-6 sm:p-6">
       {/* Date Picker */}
-      <div className="mb-6 flex items-center gap-4">
-        <label htmlFor="date" className="text-lg font-medium text-gray-700">
+      <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <label htmlFor="date" className="text-base sm:text-lg font-medium text-gray-700">
           Pilih Tanggal:
         </label>
         <input
@@ -74,27 +74,28 @@ export default function DashboardPage() {
           type="date"
           value={selectedDate}
           onChange={e => setSelectedDate(e.target.value)}
+          className="border rounded-md px-2 py-1 text-gray-900"
         />
-        {loading && <span className="ml-2 text-gray-400">Loading...</span>}
+        {loading && <span className="ml-2 text-gray-400 text-sm sm:text-base">Loading...</span>}
       </div>
 
       {/* Top stats cards (Hadir, Sakit, Izin, Alfa) */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="bg-white rounded-2xl shadow-md p-4 text-center">
-          <h3 className="text-blue-600 font-medium">Hadir | {selectedDate}</h3>
-          <p className="text-3xl font-bold text-blue-600">{counts.Hadir}</p>
+          <h3 className="text-blue-600 font-medium text-sm sm:text-base">Hadir | {selectedDate}</h3>
+          <p className="text-2xl sm:text-3xl font-bold text-blue-600">{counts.Hadir}</p>
         </div>
         <div className="bg-white rounded-2xl shadow-md p-4 text-center">
-          <h3 className="text-green-600 font-medium">Sakit | {selectedDate}</h3>
-          <p className="text-3xl font-bold text-green-600">{counts.Sakit}</p>
+          <h3 className="text-green-600 font-medium text-sm sm:text-base">Sakit | {selectedDate}</h3>
+          <p className="text-2xl sm:text-3xl font-bold text-green-600">{counts.Sakit}</p>
         </div>
         <div className="bg-white rounded-2xl shadow-md p-4 text-center">
-          <h3 className="text-orange-500 font-medium">Izin | {selectedDate}</h3>
-          <p className="text-3xl font-bold text-orange-500">{counts.Izin}</p>
+          <h3 className="text-orange-500 font-medium text-sm sm:text-base">Izin | {selectedDate}</h3>
+          <p className="text-2xl sm:text-3xl font-bold text-orange-500">{counts.Izin}</p>
         </div>
         <div className="bg-white rounded-2xl shadow-md p-4 text-center">
-          <h3 className="text-red-500 font-medium">Alfa | {selectedDate}</h3>
-          <p className="text-3xl font-bold text-red-500">{counts.Alfa}</p>
+          <h3 className="text-red-500 font-medium text-sm sm:text-base">Alfa | {selectedDate}</h3>
+          <p className="text-2xl sm:text-3xl font-bold text-red-500">{counts.Alfa}</p>
         </div>
       </div>
 
