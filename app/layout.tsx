@@ -1,5 +1,4 @@
 // app/layout.tsx
-"use client";
 
 import "./globals.css";
 import type { Metadata } from "next";
@@ -7,11 +6,10 @@ import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 import { useState } from "react";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Attendance App",
   description: "Manage student attendance",
 };
-
 
 export default function RootLayout({
   children,
