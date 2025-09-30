@@ -10,7 +10,8 @@ import { useState } from "react";
 export const metadata: Metadata = {
   title: "Attendance App",
   description: "Manage student attendance",
-};
+} as const;
+
 
 export default function RootLayout({
   children,
