@@ -45,7 +45,7 @@ export default function StudentsPage() {
     async function fetchStudents() {
       setLoading(true);
       let query = supabase
-        .from("students")
+        .from("members")
         .select("id,name,class")
         .order("class", { ascending: true })
         .order("name", { ascending: true });
@@ -100,7 +100,7 @@ export default function StudentsPage() {
     if (editId !== null) {
       // Edit mode
       const { error } = await supabase
-        .from("students")
+        .from("members")
         .update({
           id: Number(addId),
           name: addName,
@@ -119,7 +119,7 @@ export default function StudentsPage() {
       }
     } else {
       // Add mode
-      const { error } = await supabase.from("students").insert([
+      const { error } = await supabase.from("members").insert([
         {
           id: Number(addId),
           name: addName,
@@ -152,7 +152,7 @@ export default function StudentsPage() {
   // Handle delete student
   async function handleDelete(id: number) {
     if (!confirm("Are you sure you want to delete this student?")) return;
-    const { error } = await supabase.from("students").delete().eq("id", id);
+    const { error } = await supabase.from("members").delete().eq("id", id);
     if (error) {
       setAddError(error.message);
     } else {
@@ -204,7 +204,7 @@ export default function StudentsPage() {
           setCsvError("No valid students found in CSV or class not in list.");
           return;
         }
-        const { error } = await supabase.from("students").insert(validStudents);
+        const { error } = await supabase.from("members").insert(validStudents);
         if (error) {
           setCsvError(error.message);
         } else {

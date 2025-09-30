@@ -80,7 +80,7 @@ export default function AttendanceChart({ selectedDate }: AttendanceChartProps) 
 
       // Count statuses per class and for DA
       (data as any[]).forEach((row) => {
-        const className = row.students?.class;
+        const className = row.members?.class;
         const status = row.status as AttendanceStatus;
         if (
           className &&

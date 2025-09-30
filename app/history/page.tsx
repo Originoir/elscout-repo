@@ -57,7 +57,7 @@ export default function AttendanceHistoryPage() {
       if (selectedClass === "DA") {
         // DA = XIF1-XIF9
         const { data, error } = await supabase
-          .from("students")
+          .from("members")
           .select("id,name,class")
           .ilike("class", "XIF%");
         if (!error && data) {
@@ -65,7 +65,7 @@ export default function AttendanceHistoryPage() {
         }
       } else {
         const { data, error } = await supabase
-          .from("students")
+          .from("members")
           .select("id,name,class")
           .eq("class", selectedClass);
         if (!error && data) {
