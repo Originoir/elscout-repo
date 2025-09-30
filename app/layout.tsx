@@ -7,10 +7,10 @@ import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 import { useState } from "react";
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Attendance App",
   description: "Manage student attendance",
-} as const;
+};
 
 
 export default function RootLayout({
