@@ -44,7 +44,7 @@ export default function AttendanceChart({ selectedDate }: AttendanceChartProps) 
       // Get all attendance for the selected date, joined with students to get class
       const { data, error } = await supabase
         .from("attendance")
-        .select("status,student_id,students(class)")
+        .select("status,student_id,members(class)")
         .eq("date", selectedDate);
 
       if (error) {
