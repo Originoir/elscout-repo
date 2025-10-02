@@ -1,3 +1,5 @@
+"use client";
+
 import "./globals.css";
 import type { Metadata } from "next";
 import CardNav, { CardNavItem } from "@/components/CardNav";
@@ -46,8 +48,8 @@ export default function RootLayout({
     <html lang="en">
       <body className="bg-gray-900 text-white">
         <CardNav
-          logo="/logo.png"
-          logoAlt="Attendance App Logo"
+          logo="/logo.svg"
+          logoAlt="Eleven Scout"
           items={navItems}
           baseColor="#111827"
           menuColor="#fff"
