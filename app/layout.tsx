@@ -46,7 +46,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="bg-gray-900 text-white">
         <CardNav
-          logo="/logo.svg"
+          logo="/Logo Stacked Horizontal Dark.svg"
           logoAlt="Eleven Scout"
           items={navItems}
           baseColor="#111827"
